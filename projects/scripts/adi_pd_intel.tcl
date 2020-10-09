@@ -93,6 +93,14 @@ proc rev_by_string {str} {
 proc sysid_gen_sys_init_file {{custom_string {}}} {
 
   global project_name;
+  if {[info exists project_name]} {
+    puts "yesyesyes";
+	puts "project_name: $project_name";
+  } else {
+    puts "nonono";
+    set project_name [current_project];
+	puts "project_name: $project_name";
+  }
 
   if {[catch {exec git rev-parse HEAD} gitsha_string] != 0} {
     set gitsha_string 0;
@@ -122,12 +130,17 @@ proc sysid_gen_sys_init_file {{custom_string {}}} {
   set verh_hex [format %0-[expr [expr $verh_size] * 8]s $verh_hex];
 
   set table_size 16;
+
   set comh_size [expr 8 * $table_size];
 
   set comh_ver_hex "00000001";
 
-  set projname_hex [hexstr_flip [stringtohex [lindex [split $project_name _] 0] 32]];
-  set boardname_hex [hexstr_flip [stringtohex [lindex [split $project_name) _] 1] 32]];
+  set boardname [lindex [split $project_name _] [expr [llength [split $project_name _]] - 1]]
+
+  set boardname_hex [hexstr_flip [stringtohex $boardname 32]]
+
+  set projname_hex [hexstr_flip [stringtohex [string trimright [string trimright $project_name $boardname] _] 32]]
+
   set custom_hex [hexstr_flip [stringtohex $custom_string 64]];
 
   set pr_offset "00000000";
