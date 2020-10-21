@@ -148,7 +148,7 @@ proc sysid_gen_sys_init_file {{custom_string {}}} {
   set verh_hex [format %0-[expr [expr $verh_size] * 8]s $verh_hex];
   set table_size 16;
   set comh_size [expr 8 * $table_size];
-  set comh_ver_hex "00000001";
+  set comh_ver_hex "00000002";
 
   set boardname_string [lindex [split $project_name _] [expr [llength [split $project_name _]] - 1]];
   set boardname_hex [hexstr_flip [stringtohex $boardname_string 32]];
