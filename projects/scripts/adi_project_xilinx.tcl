@@ -1,7 +1,7 @@
 
 ## Define the supported tool version
 if {![info exists REQUIRED_VIVADO_VERSION]} {
-  set REQUIRED_VIVADO_VERSION "2019.1"
+  set REQUIRED_VIVADO_VERSION "2019.2"
 }
 
 ## Define the ADI_IGNORE_VERSION_CHECK environment variable to skip version check
@@ -117,6 +117,12 @@ proc adi_project {project_name {mode 0} {parameter_list {}} } {
     set p_board [lindex [lsearch -all -inline [get_board_parts] *zcu102*] end]
     set sys_zynq 2
   }
+  if [regexp "_trenz$" $project_name] {
+    set p_device "xczu7ev-fbvb900-1-e"
+    set p_board "not-applicable"
+    set sys_zynq 2
+  }
+
 
   set VIVADO_VERSION [version -short]
   if {$IGNORE_VERSION_CHECK} {
