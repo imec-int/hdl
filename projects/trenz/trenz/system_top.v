@@ -40,7 +40,7 @@ module system_top (
 //  input       [12:0]      gpio_bd_i,
 //  output      [ 7:0]      gpio_bd_o,
 //  input       [12:0]      gpio_bd_i,
-  output      [ 0:0]      gpio_bd_o,
+//  output      [ 0:0]      gpio_bd_o,
 
 
   input                   rx_ref_clk_p,
@@ -160,11 +160,11 @@ module system_top (
               dac_irq,          // 34
               clkd_status}));   // 32
 
-  assign gpio_i[31:1] = gpio_o[31:1];
+  assign gpio_i[31:0] = gpio_o[31:0];
 
   /* Board GPIOS. Buttons, LEDs, etc... */
 //  assign gpio_i[20: 8] = gpio_bd_i;
-  assign gpio_bd_o = gpio_o[0:0];
+//  assign gpio_bd_o = gpio_o[0:0];
 
   system_wrapper i_system_wrapper (
     .gpio_i (gpio_i),

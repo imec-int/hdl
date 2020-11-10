@@ -390,10 +390,14 @@ proc adi_project_run {project_name} {
   set timing_string $[report_timing_summary -return_string]
   if { [string match "*VIOLATED*" $timing_string] == 1 ||
        [string match "*Timing constraints are not met*" $timing_string] == 1} {
-    file copy -force $project_name.runs/impl_1/system_top.sysdef $project_name.sdk/system_top_bad_timing.hdf
+  #2019.1  file copy -force $project_name.runs/impl_1/system_top.sysdef $project_name.sdk/system_top_bad_timing.hdf
+    file copy -force./system_top.xsa $project_name.sdk/system_top_bad_timing.xsa 
+#2019.2
     return -code error [format "ERROR: Timing Constraints NOT met!"]
   } else {
-    file copy -force $project_name.runs/impl_1/system_top.sysdef $project_name.sdk/system_top.hdf
+ #2019.1   file copy -force $project_name.runs/impl_1/system_top.sysdef $project_name.sdk/system_top.hdf
+    file copy -force ./system_top.xsa $project_name.sdk/system_top.xsa 
+#2019.2
   }
 }
 
@@ -488,16 +492,28 @@ proc adi_project_impl {project_name prcfg_name {xdc_files ""}} {
   update_design -cell i_prcfg -black_box
   write_checkpoint -force $p_prefix.${prcfg_name}_impl_bb.dcp
   open_checkpoint $p_prefix.${prcfg_name}_impl.dcp -part $p_device
-  write_bitstream -force -bin_file -file $p_prefix.${prcfg_name}.bit
-  write_sysdef -hwdef $p_prefix.hwdef -bitfile $p_prefix.${prcfg_name}.bit -file $p_prefix.${prcfg_name}.hdf
-  file copy -force $p_prefix.${prcfg_name}.hdf $project_name.sdk/system_top.${prcfg_name}.hdf
+  #2019.1 compatibility: 
+  #write_bitstream -force -bin_file -file $p_prefix.${prcfg_name}.bit
+  #write_sysdef -hwdef $p_prefix.hwdef -bitfile $p_prefix.${prcfg_name}.bit -file $p_prefix.${prcfg_name}.hdf
+  #file copy -force $p_prefix.${prcfg_name}.hdf $project_name.sdk/system_top.${prcfg_name}.hdf
+
+  #if {$prcfg_name ne "default"} {
+  #  lappend p_prcfg_list "$p_prefix.${prcfg_name}_impl.dcp"
+ #}
+
+ #if {$prcfg_name eq "default"} {
+ #   file copy -force $p_prefix.${prcfg_name}.hdf $project_name.sdk/system_top.hdf
+ # }
+  #2019.2 compatibility: 
+  write_hw_platform -fixed -force  -include_bit -file $p_prefix.${prcfg_name}.xsa
+  file copy -force $p_prefix.${prcfg_name}.xsa $project_name.sdk/system_top.${prcfg_name}.xsa
 
   if {$prcfg_name ne "default"} {
     lappend p_prcfg_list "$p_prefix.${prcfg_name}_impl.dcp"
   }
 
   if {$prcfg_name eq "default"} {
-    file copy -force $p_prefix.${prcfg_name}.hdf $project_name.sdk/system_top.hdf
+    file copy -force $p_prefix.${prcfg_name}.xsa $project_name.sdk/system_top.xsa
   }
 }
 
