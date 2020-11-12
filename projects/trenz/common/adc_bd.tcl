@@ -14,12 +14,12 @@ set dac_fifo_name axi_ad9152_fifo
 set dac_data_width [expr $TX_SAMPLE_WIDTH * $TX_NUM_OF_CONVERTERS * $TX_SAMPLES_PER_CHANNEL]
 
 # RX parameters
-set RX_NUM_OF_LANES 4      ; # L
-set RX_NUM_OF_CONVERTERS 2 ; # M
+set RX_NUM_OF_LANES 2      ; # L
+set RX_NUM_OF_CONVERTERS 8 ; # M
 set RX_SAMPLES_PER_FRAME 1 ; # S
 set RX_SAMPLE_WIDTH 16     ; # N/NP
 
-set RX_SAMPLES_PER_CHANNEL [expr $RX_NUM_OF_LANES * 32 / \
+set RX_SAMPLES_PER_CHANNEL [expr $RX_NUM_OF_LANES * 32.0 / \
                                 ($RX_NUM_OF_CONVERTERS * $RX_SAMPLE_WIDTH)] ; # L * 32 / (M * N)
 
 set adc_fifo_name axi_ad9675_fifo

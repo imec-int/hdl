@@ -3,8 +3,13 @@
 ## Auto-generated, do not modify!
 ####################################################################################
 
-PROJECT_NAME := AD_trenz
 
+PROJECT_NAME := AD_trenz
+BOARD:= pulsify
+#ifeq (BOARD, baseboard)
+#	echo "compiling for evaluation board"
+M_DEPS += ../common/base_board/base_board.tcl
+#endif
 M_DEPS += ../common/adc_spi.v
 M_DEPS += ../common/adc_bd.tcl
 M_DEPS += ../../common/trenz/trenz_system_constr.xdc

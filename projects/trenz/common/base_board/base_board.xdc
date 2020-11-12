@@ -2,7 +2,7 @@
 ##System Controller IP
 
 #J3:31 LED_HD
-set_property PACKAGE_PIN K11 [get_ports gpio_bd_o[0]]
+set_property PACKAGE_PIN K11 [get_ports BASE_sc0]
 #J3:41
 set_property PACKAGE_PIN E14 [get_ports BASE_sc5]
 #J3:45
@@ -58,13 +58,13 @@ set_property IOSTANDARD LVCMOS18 [get_ports BASE_sc19]
 #BCLK		J3:51 B47_L9_P
 #DAC_SDATA	J3:53 B47_L7_N
 #ADC_SDATA	J3:55 B47_L7_P
-set_property PACKAGE_PIN G14 [get_ports I2S_lrclk ]
-set_property PACKAGE_PIN H14 [get_ports I2S_bclk ]
-set_property PACKAGE_PIN C13 [get_ports I2S_sdin ]
-set_property PACKAGE_PIN D14 [get_ports I2S_sdout ]
-set_property IOSTANDARD LVCMOS18 [get_ports I2S_lrclk ]
-set_property IOSTANDARD LVCMOS18 [get_ports I2S_bclk ]
-set_property IOSTANDARD LVCMOS18 [get_ports I2S_sdin ]
-set_property IOSTANDARD LVCMOS18 [get_ports I2S_sdout ]
+#set_property PACKAGE_PIN G14 [get_ports I2S_lrclk ]
+#set_property PACKAGE_PIN H14 [get_ports I2S_bclk ]
+#set_property PACKAGE_PIN C13 [get_ports I2S_sdin ]
+#set_property PACKAGE_PIN D14 [get_ports I2S_sdout ]
+#set_property IOSTANDARD LVCMOS18 [get_ports I2S_lrclk ]
+#set_property IOSTANDARD LVCMOS18 [get_ports I2S_bclk ]
+#set_property IOSTANDARD LVCMOS18 [get_ports I2S_sdin ]
+#set_property IOSTANDARD LVCMOS18 [get_ports I2S_sdout ]
 
 
