@@ -137,7 +137,27 @@ proc ad_connect {p_name_1 p_name_2} {
     return
   }
 }
+proc ad_reconct {p_name_1 p_name_2} {
 
+  set m_name_1 [ad_connect_type $p_name_1]
+  set m_name_2 [ad_connect_type $p_name_2]
+
+  if {[get_property CLASS $m_name_1] eq "bd_pin"} {
+    delete_bd_objs -quiet [get_bd_nets -quiet -of_objects \
+      [find_bd_objs -relation connected_to $m_name_1]]
+    delete_bd_objs -quiet [get_bd_nets -quiet -of_objects \
+      [find_bd_objs -relation connected_to $m_name_2]]
+  }
+
+  if {[get_property CLASS $m_name_1] eq "bd_intf_pin"} {
+    delete_bd_objs -quiet [get_bd_intf_nets -quiet -of_objects \
+      [find_bd_objs -relation connected_to $m_name_1]]
+    delete_bd_objs -quiet [get_bd_intf_nets -quiet -of_objects \
+      [find_bd_objs -relation connected_to $m_name_2]]
+  }
+
+  ad_connect $p_name_1 $p_name_2
+}
 ## Disconnect two IPI interface object together.
 #
 # \param[p_name_1] - first object name

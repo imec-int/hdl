@@ -60,7 +60,7 @@ ad_ip_parameter axi_ad9675_xcvr CONFIG.SYS_CLK_SEL 0
 ad_ip_parameter axi_ad9675_xcvr CONFIG.OUT_CLK_SEL 3
 
 
-adi_axi_jesd204_rx_create axi_ad9675_jesd $RX_NUM_OF_LANES
+adi_axi_jesd204_rx_create axi_ad9675_rx_jesd $RX_NUM_OF_LANES
 
 adi_tpl_jesd204_rx_create axi_ad9675_tpl_core $RX_NUM_OF_LANES \
                                                $RX_NUM_OF_CONVERTERS \
@@ -74,7 +74,7 @@ adi_tpl_jesd204_rx_create axi_ad9675_tpl_core $RX_NUM_OF_LANES \
 #  ]
 
 ad_ip_instance axi_dmac axi_ad9675_dma
-ad_ip_parameter axi_ad9675_dma CONFIG.DMA_TYPE_SRC 1
+ad_ip_parameter axi_ad9675_dma CONFIG.DMA_TYPE_SRC 2
 ad_ip_parameter axi_ad9675_dma CONFIG.DMA_TYPE_DEST 0
 ad_ip_parameter axi_ad9675_dma CONFIG.ID 0
 ad_ip_parameter axi_ad9675_dma CONFIG.AXI_SLICE_SRC 0
@@ -93,7 +93,7 @@ if {$sys_zynq == 0 || $sys_zynq == 1} {
 # shared transceiver core
 
 ad_ip_instance util_adxcvr util_ad9675_xcvr
-ad_ip_parameter util_ad9675_xcvr CONFIG.RX_NUM_OF_LANES [expr $RX_NUM_OF_LANES+$RX_OS_NUM_OF_LANES]#$RX_NUM_OF_LANES
+ad_ip_parameter util_ad9675_xcvr CONFIG.RX_NUM_OF_LANES $RX_NUM_OF_LANES
 ad_ip_parameter util_ad9675_xcvr CONFIG.TX_NUM_OF_LANES $TX_NUM_OF_LANES
 ad_ip_parameter util_ad9675_xcvr CONFIG.QPLL_REFCLK_DIV 1
 ad_ip_parameter util_ad9675_xcvr CONFIG.QPLL_FBDIV_RATIO 1
@@ -111,21 +111,24 @@ ad_connect  $sys_cpu_clk util_ad9675_xcvr/up_clk
 create_bd_port -dir I tx_ref_clk_0
 create_bd_port -dir I rx_ref_clk_0
 
-ad_xcvrpll  tx_ref_clk_0 util_ad9675_xcvr/qpll_ref_clk_*
-ad_xcvrpll  rx_ref_clk_0 util_ad9675_xcvr/cpll_ref_clk_*
-ad_xcvrpll  axi_ad9675_xcvr/up_pll_rst util_ad9675_xcvr/up_cpll_rst_*
+#ad_xcvrpll  tx_ref_clk_0 util_ad9675_xcvr/qpll_ref_clk_*
+#ad_xcvrpll  rx_ref_clk_0 util_ad9675_xcvr/cpll_ref_clk_*
+#ad_xcvrpll  axi_ad9675_xcvr/up_pll_rst util_ad9675_xcvr/up_cpll_rst_*
 
 # connections (adc)
+set rx_offset 0
 
-ad_xcvrcon  util_ad9675_xcvr axi_ad9675_xcvr axi_ad9675_jesd
-ad_reconct  util_ad9675_xcvr/rx_out_clk_0 axi_ad9675_rx_clkgen/clk#ad_connect axi_ad9675_tpl_core/link_clk
+ad_xcvrcon  util_ad9675_xcvr axi_ad9675_xcvr axi_ad9675_rx_jesd
+ad_reconct util_ad9675_xcvr/rx_out_clk_$rx_offset axi_ad9675_rx_clkgen/clk; # axi_ad9675_tpl_core/link_clk 
 for {set i 0} {$i < $RX_NUM_OF_LANES} {incr i} {
-  ad_connect  $rx_link_clk util_ad9675_xcvr/rx_clk_$i
-  ad_xcvrpll  rx_ref_clk_0 util_ad9675_xcvr/cpll_ref_clk_$i
-  ad_xcvrpll  axi_ad9675_rx_xcvr/up_pll_rst util_ad9675_xcvr/up_cpll_rst_$i
+  set ch [expr $rx_offset+$i]
+  ad_connect  $rx_link_clk util_ad9675_xcvr/rx_clk_$ch
+  ad_xcvrpll  rx_ref_clk_0 util_ad9675_xcvr/cpll_ref_clk_$ch
+  ad_xcvrpll  axi_ad9675_xcvr/up_pll_rst util_ad9675_xcvr/up_cpll_rst_$ch
 }
-ad_connect  $rx_link_clk axi_ad9675_rx_jesd/device_clk
-ad_connect  $rx_link_clk axi_ad9675_rx_jesd_rstgen/slowest_sync_clk
+#ad_reconnect?
+#ad_connect  $rx_link_clk axi_ad9675_rx_jesd/device_clk
+#ad_connect  $rx_link_clk axi_ad9675_rx_jesd_rstgen/slowest_sync_clk
 
 
 #if {$sys_zynq == 0 || $sys_zynq == 1} {
@@ -166,29 +169,29 @@ ad_connect  sys_dma_reset sys_dma_rstgen/peripheral_reset
 #ad_connect  axi_ad9675_jesd/rx_data_tvalid axi_ad9675_tpl_core/link_valid
 #ad_connect  axi_ad9675_tpl_core/adc_valid_0 axi_ad9675_cpack/fifo_wr_en
 
-ad_connect $rx_data_clk rx_ad9675_tpl_core/link_clk
-if {$RX_TPL_BYTES_PER_BEAT > $LINK_LAYER_BYTES_PER_BEAT} {
-  ad_ip_instance ad_ip_jesd204_link_dnconv rx_link_dnconverter [list\
-    NUM_LANES $RX_NUM_OF_LANES \
-    OCTETS_PER_BEAT_IN $LINK_LAYER_BYTES_PER_BEAT \
-    OCTETS_PER_BEAT_OUT $RX_TPL_BYTES_PER_BEAT \
-  ]
-  ad_connect $rx_link_clk rx_link_dnconverter/in_link_clk
-  ad_connect $rx_data_clk rx_link_dnconverter/out_link_clk
-
-  ad_connect axi_ad9675_rx_jesd/rx_data_tdata rx_link_dnconverter/in_link_data
-  ad_connect axi_ad9675_rx_jesd/rx_data_tvalid rx_link_dnconverter/in_link_valid
-  ad_connect axi_ad9675_rx_jesd/rx_sof rx_link_dnconverter/in_link_sof
-
-  ad_connect rx_link_dnconverter/out_link_data rx_ad9675_tpl_core/link_data
-  ad_connect rx_link_dnconverter/out_link_valid rx_ad9675_tpl_core/link_valid
-  ad_connect rx_link_dnconverter/out_link_sof rx_ad9675_tpl_core/link_sof
-
-} else {
-  ad_connect axi_ad9675_rx_jesd/rx_data_tdata rx_ad9675_tpl_core/link_data
-  ad_connect axi_ad9675_rx_jesd/rx_data_tvalid rx_ad9675_tpl_core/link_valid
-  ad_connect axi_ad9675_rx_jesd/rx_sof rx_ad9675_tpl_core/link_sof
-}
+ad_connect $rx_data_clk axi_ad9675_tpl_core/link_clk
+#if {$RX_TPL_BYTES_PER_BEAT > $LINK_LAYER_BYTES_PER_BEAT} {
+#  ad_ip_instance ad_ip_jesd204_link_dnconv rx_link_dnconverter [list\
+#    NUM_LANES $RX_NUM_OF_LANES \
+#    OCTETS_PER_BEAT_IN $LINK_LAYER_BYTES_PER_BEAT \
+#    OCTETS_PER_BEAT_OUT $RX_TPL_BYTES_PER_BEAT \
+#  ]
+#  ad_connect $rx_link_clk rx_link_dnconverter/in_link_clk
+#  ad_connect $rx_data_clk rx_link_dnconverter/out_link_clk
+#
+#  ad_connect axi_ad9675_rx_jesd/rx_data_tdata rx_link_dnconverter/in_link_data
+#  ad_connect axi_ad9675_rx_jesd/rx_data_tvalid rx_link_dnconverter/in_link_valid
+#  ad_connect axi_ad9675_rx_jesd/rx_sof rx_link_dnconverter/in_link_sof
+#
+#  ad_connect rx_link_dnconverter/out_link_data axi_ad9675_tpl_core/link_data
+#  ad_connect rx_link_dnconverter/out_link_valid axi_ad9675_tpl_core/link_valid
+#  ad_connect rx_link_dnconverter/out_link_sof axi_ad9675_tpl_core/link_sof
+#
+#} else {
+#  ad_connect axi_ad9675_rx_jesd/rx_data_tdata axi_ad9675_tpl_core/link_data
+#  ad_connect axi_ad9675_rx_jesd/rx_data_tvalid axi_ad9675_tpl_core/link_valid
+#  ad_connect axi_ad9675_rx_jesd/rx_sof axi_ad9675_tpl_core/link_sof
+#}
 
 if {$RX_NUM_OF_CONVERTERS > 1} {
 
@@ -202,29 +205,29 @@ if {$RX_NUM_OF_CONVERTERS > 1} {
 
   for {set i 0} {$i < $RX_NUM_OF_CONVERTERS} {incr i} {
 
-    ad_connect rx_ad9675_tpl_core/adc_data_$i util_ad9675_rx_cpack/adc_data_$i
-    ad_connect rx_ad9675_tpl_core/adc_enable_$i util_ad9675_rx_cpack/adc_enable_$i
-    ad_connect rx_ad9675_tpl_core/adc_valid_$i util_ad9675_rx_cpack/adc_valid_$i
+    ad_connect axi_ad9675_tpl_core/adc_data_$i util_ad9675_rx_cpack/adc_data_$i
+    ad_connect axi_ad9675_tpl_core/adc_enable_$i util_ad9675_rx_cpack/adc_enable_$i
+    ad_connect axi_ad9675_tpl_core/adc_valid_$i util_ad9675_rx_cpack/adc_valid_$i
   }
 
-  ad_connect  util_ad9675_rx_cpack/adc_valid axi_ad9675_rx_dma/fifo_wr_en
-  ad_connect  util_ad9675_rx_cpack/adc_sync axi_ad9675_rx_dma/fifo_wr_sync
-  ad_connect  util_ad9675_rx_cpack/adc_data axi_ad9675_rx_dma/fifo_wr_din
+  ad_connect  util_ad9675_rx_cpack/adc_valid axi_ad9675_dma/fifo_wr_en
+  ad_connect  util_ad9675_rx_cpack/adc_sync axi_ad9675_dma/fifo_wr_sync
+  ad_connect  util_ad9675_rx_cpack/adc_data axi_ad9675_dma/fifo_wr_din
 
 } else {
   #connect DMA to TPL directly
-  ad_connect rx_ad9675_tpl_core/adc_valid_0 axi_ad9675_rx_dma/fifo_wr_en
-  ad_connect rx_ad9675_tpl_core/adc_data_0 axi_ad9675_rx_dma/fifo_wr_din
+  ad_connect rx_ad9675_tpl_core/adc_valid_0 axi_ad9675_dma/fifo_wr_en
+  ad_connect rx_ad9675_tpl_core/adc_data_0 axi_ad9675_dma/fifo_wr_din
 }
-ad_connect  axi_ad9675_rx_dma/fifo_wr_overflow rx_ad9675_tpl_core/adc_dovf
-ad_connect  $rx_data_clk axi_ad9675_rx_dma/fifo_wr_clk
-ad_connect  sys_dma_resetn axi_ad9675_rx_dma/m_dest_axi_aresetn
+ad_connect  axi_ad9675_dma/fifo_wr_overflow axi_ad9675_tpl_core/adc_dovf
+ad_connect  $rx_data_clk axi_ad9675_dma/fifo_wr_clk
+ad_connect  sys_dma_resetn axi_ad9675_dma/m_dest_axi_aresetn
 
 # interconnect (cpu)
 
 ad_cpu_interconnect 0x44A50000 axi_ad9675_xcvr
 ad_cpu_interconnect 0x44A10000 axi_ad9675_tpl_core
-ad_cpu_interconnect 0x44AA0000 axi_ad9675_jesd
+ad_cpu_interconnect 0x44AA0000 axi_ad9675_rx_jesd
 ad_cpu_interconnect 0x7c400000 axi_ad9675_dma
 
 
@@ -237,5 +240,5 @@ if {$sys_zynq == 0 || $sys_zynq == 1} {
 
 # interrupts
 
-ad_cpu_interrupt ps-11 mb-14 axi_ad9675_jesd/irq
+ad_cpu_interrupt ps-11 mb-14 axi_ad9675_rx_jesd/irq
 ad_cpu_interrupt ps-13 mb-12 axi_ad9675_dma/irq
