@@ -60,7 +60,7 @@ set_property  -dict {PACKAGE_PIN  U3  } [get_ports rx_data_n[3]]                
 
 ##J3:31 LED_HD
 #set_property PACKAGE_PIN K11 [get_ports gpio_bd_o[0]]
-set_property  -dict {PACKAGE_PIN  K11  IOSTANDARD LVCMOS33} [get_ports gpio_bd_o[0]]           ; ## GPIO_LED_0
+#set_property  -dict {PACKAGE_PIN  K11  IOSTANDARD LVCMOS33} [get_ports gpio_bd_o[0]]           ; ## GPIO_LED_0
 ##J3:41
 #set_property PACKAGE_PIN E14 [get_ports BASE_sc5]
 ##J3:45

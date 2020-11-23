@@ -391,7 +391,7 @@ proc adi_project_run {project_name} {
   if { [string match "*VIOLATED*" $timing_string] == 1 ||
        [string match "*Timing constraints are not met*" $timing_string] == 1} {
   #2019.1  file copy -force $project_name.runs/impl_1/system_top.sysdef $project_name.sdk/system_top_bad_timing.hdf
-    file copy -force./system_top.xsa $project_name.sdk/system_top_bad_timing.xsa 
+    file copy -force ./system_top.xsa $project_name.sdk/system_top_bad_timing.xsa 
 #2019.2
     return -code error [format "ERROR: Timing Constraints NOT met!"]
   } else {

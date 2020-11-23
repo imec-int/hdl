@@ -196,32 +196,34 @@ if {$RX_TPL_BYTES_PER_BEAT > $LINK_LAYER_BYTES_PER_BEAT} {
 if {$RX_NUM_OF_CONVERTERS > 1} {
 
   #connect DMA to TPL through cpack
-  ad_ip_instance util_cpack util_ad9675_rx_cpack
-  ad_ip_parameter util_ad9675_rx_cpack CONFIG.CHANNEL_DATA_WIDTH [expr $RX_SAMPLE_WIDTH*$RX_SAMPLES_PER_CHANNEL]
+  ad_ip_instance util_cpack2 util_ad9675_rx_cpack
+  ad_ip_parameter util_ad9675_rx_cpack CONFIG.SAMPLE_DATA_WIDTH [expr $RX_SAMPLE_WIDTH*$RX_SAMPLES_PER_CHANNEL]
   ad_ip_parameter util_ad9675_rx_cpack CONFIG.NUM_OF_CHANNELS $RX_NUM_OF_CONVERTERS
+  ad_ip_parameter util_ad9675_rx_cpack CONFIG.SAMPLES_PER_CHANNEL 1
 
-  ad_connect  $rx_data_clk util_ad9675_rx_cpack/adc_clk
-  ad_connect  axi_ad9675_rx_jesd_rstgen/peripheral_reset util_ad9675_rx_cpack/adc_rst
+  ad_connect  $rx_data_clk util_ad9675_rx_cpack/clk
+  ad_connect  axi_ad9675_rx_jesd_rstgen/peripheral_reset util_ad9675_rx_cpack/reset
 
   for {set i 0} {$i < $RX_NUM_OF_CONVERTERS} {incr i} {
-
-    ad_connect axi_ad9675_tpl_core/adc_data_$i util_ad9675_rx_cpack/adc_data_$i
-    ad_connect axi_ad9675_tpl_core/adc_enable_$i util_ad9675_rx_cpack/adc_enable_$i
-    ad_connect axi_ad9675_tpl_core/adc_valid_$i util_ad9675_rx_cpack/adc_valid_$i
+    ad_connect axi_ad9675_tpl_core/adc_data_$i util_ad9675_rx_cpack/fifo_wr_data_$i
+    ad_connect axi_ad9675_tpl_core/adc_enable_$i util_ad9675_rx_cpack/enable_$i  
   }
+  ad_connect axi_ad9675_tpl_core/adc_valid_0 util_ad9675_rx_cpack/fifo_wr_en
 
-  ad_connect  util_ad9675_rx_cpack/adc_valid axi_ad9675_dma/fifo_wr_en
-  ad_connect  util_ad9675_rx_cpack/adc_sync axi_ad9675_dma/fifo_wr_sync
-  ad_connect  util_ad9675_rx_cpack/adc_data axi_ad9675_dma/fifo_wr_din
+  ad_connect  util_ad9675_rx_cpack/packed_fifo_wr axi_ad9675_dma/fifo_wr
+ # ad_connect  util_ad9675_rx_cpack/adc_sync axi_ad9675_dma/fifo_wr_sync
+ # ad_connect  util_ad9675_rx_cpack/adc_data axi_ad9675_dma/fifo_wr_din
 
 } else {
   #connect DMA to TPL directly
   ad_connect rx_ad9675_tpl_core/adc_valid_0 axi_ad9675_dma/fifo_wr_en
   ad_connect rx_ad9675_tpl_core/adc_data_0 axi_ad9675_dma/fifo_wr_din
 }
-ad_connect  axi_ad9675_dma/fifo_wr_overflow axi_ad9675_tpl_core/adc_dovf
+#ad_connect  axi_ad9675_dma/fifo_wr_overflow axi_ad9675_tpl_core/adc_dovf
 ad_connect  $rx_data_clk axi_ad9675_dma/fifo_wr_clk
-ad_connect  proc_sys_reset axi_ad9675_dma/m_dest_axi_aresetn;# sys_dma_resetn
+ad_connect  sys_250m_resetn axi_ad9675_dma/m_dest_axi_aresetn;# sys_dma_resetn
+
+
 
 # interconnect (cpu)
 

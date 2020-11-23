@@ -2,6 +2,7 @@
 source ../../scripts/adi_env.tcl
 source $ad_hdl_dir/projects/scripts/adi_project_xilinx.tcl
 source $ad_hdl_dir/projects/scripts/adi_board.tcl
+#source ../common/base_board/base_board.tcl
 
 adi_project AD_trenz
 adi_project_files AD_trenz [list \

@@ -174,10 +174,10 @@ module system_top (
     .rx_data_0_p (rx_data_p[0]),
     .rx_data_1_n (rx_data_n[1]),
     .rx_data_1_p (rx_data_p[1]),
-    .rx_data_2_n (rx_data_n[2]),
-    .rx_data_2_p (rx_data_p[2]),
-    .rx_data_3_n (rx_data_n[3]),
-    .rx_data_3_p (rx_data_p[3]),
+//    .rx_data_2_n (rx_data_n[2]),
+//    .rx_data_2_p (rx_data_p[2]),
+//    .rx_data_3_n (rx_data_n[3]),
+//    .rx_data_3_p (rx_data_p[3]),
     .rx_ref_clk_0 (rx_ref_clk),
     .rx_sync_0 (rx_sync),
     .rx_sysref_0 (rx_sysref),
@@ -188,8 +188,8 @@ module system_top (
     .spi1_csn (),
     .spi1_miso (1'd0),
     .spi1_mosi (),
-    .spi1_sclk (),
-    .dac_fifo_bypass(gpio_o[41])
+    .spi1_sclk ()
+//    .dac_fifo_bypass(gpio_o[41])
     );
 
 endmodule
