@@ -43,13 +43,13 @@ ad_ip_parameter dma_clk_wiz CONFIG.PRIM_SOURCE No_buffer
 
 #ad_ip_instance proc_sys_reset sys_dma_rstgen
 
-#ad_connect sys_cpu_clk dma_clk_wiz/clk_in1
-#ad_connect sys_cpu_resetn dma_clk_wiz/resetn
-#
-#ad_connect sys_dma_clk dma_clk_wiz/clk_out1
+ad_connect sys_cpu_clk dma_clk_wiz/clk_in1
+ad_connect sys_cpu_resetn dma_clk_wiz/resetn
+
+ad_connect sys_dma_clk dma_clk_wiz/clk_out1
 
 #ad_connect sys_dma_clk sys_dma_rstgen/slowest_sync_clk
-#ad_connect sys_cpu_resetn sys_dma_rstgen/ext_reset_in
+ad_connect sys_cpu_resetn sys_dma_rstgen/ext_reset_in
 
 #ad_connect sys_dma_reset sys_dma_rstgen/peripheral_reset
 #ad_connect sys_dma_resetn sys_dma_rstgen/peripheral_aresetn
